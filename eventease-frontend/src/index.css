@@ -1,0 +1,161 @@
+:root {
+  /* ==========================================================================
+     EventEase Editorial Design System - Color Tokens
+     ========================================================================== */
+  --bg: #F5F0E6;
+  --background: #F5F0E6;
+  --surface: #FBF8F2;
+  --surface-cards: #FBF8F2;
+  --text: #1C1B18;
+  --text-muted: #6B665B;
+  --border: #D8CFBD;
+  --border-dark: #8C8270;
+  
+  --primary: #B4532A;
+  --primary-hover: #963F1C;
+  --primary-dark: #963F1C;
+  --primary-light: #F2E8DC;
+  
+  --secondary: #23392E;
+  --secondary-hover: #16241D;
+  --secondary-light: #E7ECE8;
+  
+  --success: #3F6B4A;
+  --success-light: #EBF2EC;
+  --warning: #B8862B;
+  --warning-light: #F7F1E3;
+  --error: #A63A2E;
+  --error-light: #F9ECEB;
+  --danger: #A63A2E;
+  --white: #FBF8F2;
+
+  /* Typography Tokens */
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Shape & Surface Tokens - Strictly 2-4px, flat solid, zero blur shadows */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius: 2px;
+
+  /* 8px Scale Grid Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+}
+
+/* Optional Dark Mode Token Overrides */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="dark"], body.dark {
+    --bg: #151513;
+    --background: #151513;
+    --surface: #1D1C19;
+    --surface-cards: #1D1C19;
+    --text: #EDE8DC;
+    --text-muted: #9E988A;
+    --border: #34312A;
+    --border-dark: #4A463B;
+    --primary: #D9733F;
+    --primary-hover: #C0602E;
+    --primary-dark: #C0602E;
+    --primary-light: #2A201A;
+    --secondary: #2D483A;
+    --secondary-hover: #1F3228;
+    --white: #1D1C19;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--text);
+  min-width: 320px;
+  line-height: 1.55;
+  text-align: left;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background-color: var(--bg);
+}
+
+/* Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 600; }
+h2 { font-size: clamp(1.6rem, 2.5vw, 2.1rem); font-weight: 500; }
+h3 { font-size: 1.25rem; font-weight: 500; }
+h4 { font-size: 1.05rem; font-weight: 500; }
+
+p {
+  color: var(--text);
+}
+
+.muted, .text-muted {
+  color: var(--text-muted);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Horizontal Rule Divider - Editorial Print Style */
+hr, .divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: var(--space-6) 0;
+}

@@ -1,0 +1,177 @@
+# ====================================================================
+# EventEase - Microservices Docker Compose Orchestration
+# ====================================================================
+# Complete full-stack multi-container microservice architecture:
+# - Frontend: React/Vite SPA on Port 3000 (served via Nginx)
+# - API Gateway: Nginx reverse proxy on Port 8080
+# - User Service: Port 8081
+# - Event Service: Port 8082
+# - Registration Service: Port 8083
+# - Notification Service: Port 8084
+# - Database: MySQL 8.0 on Port 3306 with automatic schema bootstrap
+# ====================================================================
+
+services:
+  # ------------------------------------------------------------------
+  # 1. Relational Database Service (MySQL 8.0)
+  # ------------------------------------------------------------------
+  mysql-db:
+    image: mysql:8.0
+    container_name: eventease-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-event_management}
+      MYSQL_USER: ${MYSQL_USER:-eventease}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-EventEase@2026}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-RootPassword@2026}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-RootPassword@2026}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 2. User & Authentication Microservice
+  # ------------------------------------------------------------------
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: eventease-user-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-event_management}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-eventease}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-EventEase@2026}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-EventEaseSuperSecretSecurityKey2026WithSufficientLengthForHMACSHA256SignatureVerification}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 3. Event & Category Microservice
+  # ------------------------------------------------------------------
+  event-service:
+    build:
+      context: ./services/event-service
+      dockerfile: Dockerfile
+    container_name: eventease-event-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-event_management}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-eventease}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-EventEase@2026}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-EventEaseSuperSecretSecurityKey2026WithSufficientLengthForHMACSHA256SignatureVerification}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 4. Registration & Bookmark Microservice
+  # ------------------------------------------------------------------
+  registration-service:
+    build:
+      context: ./services/registration-service
+      dockerfile: Dockerfile
+    container_name: eventease-registration-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-event_management}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-eventease}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-EventEase@2026}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-EventEaseSuperSecretSecurityKey2026WithSufficientLengthForHMACSHA256SignatureVerification}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 5. Notification Microservice
+  # ------------------------------------------------------------------
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: eventease-notification-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-event_management}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-eventease}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-EventEase@2026}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-EventEaseSuperSecretSecurityKey2026WithSufficientLengthForHMACSHA256SignatureVerification}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 6. API Gateway / Reverse Proxy (Nginx)
+  # ------------------------------------------------------------------
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: eventease-api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - event-service
+      - registration-service
+      - notification-service
+    networks:
+      - eventease-network
+
+  # ------------------------------------------------------------------
+  # 7. Frontend User Interface (React / Vite + Nginx)
+  # ------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./eventease-frontend
+      dockerfile: Dockerfile
+    container_name: eventease-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - eventease-network
+
+# --------------------------------------------------------------------
+# Networks & Persistent Volumes
+# --------------------------------------------------------------------
+networks:
+  eventease-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

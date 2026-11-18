@@ -1,0 +1,13 @@
+# Auto-detect text files and normalize line endings to LF in git
+* text=auto
+
+# Ensure shell scripts and maven wrappers keep LF line endings across all platforms
+*.sh text eol=lf
+mvnw text eol=lf
+**/mvnw text eol=lf
+
+# Batch scripts keep CRLF line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
+mvnw.cmd text eol=crlf
+**/mvnw.cmd text eol=crlf

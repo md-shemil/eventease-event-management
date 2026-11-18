@@ -1,0 +1,7 @@
+.mvn
+mvnw
+mvnw.cmd
+.git
+.github
+*.log
+.DS_Store
